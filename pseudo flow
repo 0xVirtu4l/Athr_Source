@@ -1,0 +1,21 @@
+list_pastes() → for each paste_meta:
+  peek_text, peek_hash = fetch_first_64KB_and_hash()
+  score = score_peek(peek_text, paste_meta)
+
+  create_artifact(meta, peek_hash, size)
+
+  if score < 3:
+    DONE (no raw, no deep)
+
+  full_hash, _ = stream_hash(raw_url, "sha256")   # deep
+  entities = extract_entities(streamed_content)
+  if not entities:
+    DONE (no raw)
+
+  write_snippets(entities_with_context)
+
+  if score >= 7 or watchlist_hit(entities):
+    save_raw_to_disk(stream)  # optional compression
+
+  classify_and_create_finding(entities, score)
+  index_to_opensearch(artifact_doc)
