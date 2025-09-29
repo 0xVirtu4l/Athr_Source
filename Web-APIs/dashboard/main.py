@@ -1,7 +1,7 @@
 import uvicorn
 from typing import List
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, Header
+from fastapi import Depends, FastAPI, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi.responses import Response
 
@@ -38,17 +38,17 @@ async def favicon():
     summary="Search for leaked files by domain",
 )
 async def search_leaks_by_domain(
-    x_domains: str = Header(..., alias="X-Domains", description="Comma-separated list of domains to search for."),
+    domains: str = Query(..., description="Comma-separated list of domains to search for."),
     db: AsyncSession = Depends(get_session),
 ):
     """
     Searches for leaked files (`artifacts`) that contain data related to a
     given list of domains. It checks for matching emails and domain lists
     associated with each file.
-
-    The domains are passed via the `X-Domains` header as a comma-separated string.
+    
+    The domains are passed via the `domains` query parameter as a comma-separated string.
     """
-    domain_list = [d.strip() for d in x_domains.split(",") if d.strip()]
+    domain_list = [d.strip() for d in domains.split(",") if d.strip()]
     if not domain_list:
         return []
     query = schemas.DomainSearchQuery(domains=domain_list)
