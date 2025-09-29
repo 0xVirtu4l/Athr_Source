@@ -20,6 +20,7 @@ class CommaSeparatedList(TypeDecorator):
     """
 
     impl = Text
+    cache_ok = True
 
     def process_bind_param(self, value, dialect):
         # On the way in, convert list to comma-separated string
@@ -37,17 +38,17 @@ class ContentDetails(Base):
     __tablename__ = "content_details"
 
     artifact_id = Column(Integer, primary_key=True, index=True)
-    source = Column(String, index=True)
-    source_path = Column(String)
+    source = Column(String, index=True, nullable=True)
+    source_path = Column(String, nullable=True)
     original_filename = Column(String, nullable=True)
-    severity = Column(String, index=True)
-    category = Column(String, index=True)
-    mime_type = Column(String)
-    size_bytes = Column(Integer)
-    hash_sha256 = Column(String)
-    collected_at = Column(DateTime)
-    posted_at = Column(DateTime)
-    storage_path = Column(String)
+    severity = Column(String, index=True, nullable=True)
+    category = Column(String, index=True, nullable=True)
+    mime_type = Column(String, nullable=True)
+    size_bytes = Column(Integer, nullable=True)
+    hash_sha256 = Column(String, nullable=True)
+    collected_at = Column(DateTime, nullable=True)
+    posted_at = Column(DateTime, nullable=True)
+    storage_path = Column(String, nullable=True)
 
     # Relationships
     findings_ulp = relationship("UlpFinding", back_populates="incident")
