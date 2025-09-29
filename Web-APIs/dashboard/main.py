@@ -3,6 +3,7 @@ from typing import List
 from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 import crud, schemas
@@ -23,6 +24,27 @@ app = FastAPI(
     description="An API to search for leaked files containing specific domains.",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+# --- CORS MIDDLEWARE SETUP ---
+# origins = [
+#     "http://localhost",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+#     "http://localhost:5500", # A common port for Flutter web development
+#     "http://127.0.0.1:5500",
+#     "https://athr-78dc5.web.app",
+#     "https://athr.pages.dev",
+#     "https://athr.mohamedayman.org",
+# ]
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=origins,
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
