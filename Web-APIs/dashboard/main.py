@@ -1,8 +1,9 @@
 import uvicorn
-from typing import List, Optional
+from typing import List
 from contextlib import asynccontextmanager
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import Depends, FastAPI, Query
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response
 
 import crud, schemas
@@ -19,10 +20,31 @@ async def lifespan(app: FastAPI):
 
 # Instantiate the FastAPI application
 app = FastAPI(
-    title="Security Dashboard API",
-    description="An asynchronous API to serve security incident data.",
+    title="Leaked File Search API",
+    description="An API to search for leaked files containing specific domains.",
     version="1.0.0",
     lifespan=lifespan,
+)
+
+# --- CORS MIDDLEWARE SETUP ---
+# origins = [
+#     "http://localhost",
+#     "http://localhost:8080",
+#     "http://127.0.0.1:8080",
+#     "http://localhost:5500", # A common port for Flutter web development
+#     "http://127.0.0.1:5500",
+#     "https://athr-78dc5.web.app",
+#     "https://athr.pages.dev",
+#     "https://athr.mohamedayman.org",
+# ]
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=origins,
+    allow_origins=["*"],  # Allow all origins for now
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 
@@ -32,81 +54,29 @@ async def favicon():
 
 
 @app.get(
-    "/dashboard/stats",
-    response_model=schemas.DashboardStats,
-    tags=["Dashboard"],
-    summary="Get high-level dashboard statistics",
-)
-async def read_dashboard_stats(
-    db: AsyncSession = Depends(get_session),
-):
-    """
-    Retrieve aggregated statistics for the main dashboard, such as new incidents,
-    criticality counts, and total compromised assets.
-    """
-    return await crud.get_dashboard_stats(db)
-
-
-@app.get(
-    "/incidents",
-    response_model=List[schemas.IncidentSummary],
-    tags=["Incidents"],
-    summary="Get a list of incidents with filtering and pagination",
-)
-async def read_incidents(
-    severity: Optional[str] = None,
-    category: Optional[str] = None,
-    source: Optional[str] = None,
-    skip: int = 0,
-    limit: int = 100,
-    db: AsyncSession = Depends(get_session),
-):
-    """
-    Retrieve a list of incidents. Supports filtering by severity, category, and source,
-    as well as pagination using skip and limit parameters.
-    """
-    incidents = await crud.get_incidents(
-        db, skip=skip, limit=limit, severity=severity, category=category, source=source
-    )
-    return incidents
-
-
-@app.get(
-    "/incidents/{incident_id}",
-    response_model=schemas.Incident,
-    tags=["Incidents"],
-    summary="Get a single incident by its ID",
-)
-async def read_incident(
-    incident_id: int, db: AsyncSession = Depends(get_session)
-):
-    """
-    Retrieve the full details for a single incident by its unique artifact_id,
-    including all associated findings and compromised asset information.
-    """
-    db_incident = await crud.get_incident_by_id(db, incident_id=incident_id)
-    if db_incident is None:
-        raise HTTPException(status_code=404, detail="Incident not found")
-    return db_incident
-
-
-@app.post(
-    "/search",
-    response_model=List[schemas.IncidentWithFindingsSummary],
+    "/search/domains",
+    response_model=List[schemas.LeakedFileInfo],
     tags=["Search"],
-    summary="Search for incidents based on organizational assets",
+    summary="Search for leaked files by domain",
 )
-async def search_org_incidents(
-    query: schemas.SearchQuery,
+async def search_leaks_by_domain(
+    domains: str = Query(..., description="Comma-separated list of domains to search for."),
     db: AsyncSession = Depends(get_session),
 ):
     """
-    Searches for incidents that match a given set of organizational assets,
-    including domains, IP ranges, and keywords.
+    Searches for leaked files (`artifacts`) that contain data related to a
+    given list of domains. It checks for matching emails and domain lists
+    associated with each file.
+    
+    The domains are passed via the `domains` query parameter as a comma-separated string.
     """
-    incidents = await crud.find_incidents_by_assets(db=db, query=query)
-    return incidents
+    domain_list = [d.strip() for d in domains.split(",") if d.strip()]
+    if not domain_list:
+        return []
+    query = schemas.DomainSearchQuery(domains=domain_list)
+    leaks = await crud.find_leaks_by_domains(db=db, query=query)
+    return leaks
 
 
 if __name__ == "__main__":
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True)
