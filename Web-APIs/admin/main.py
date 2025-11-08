@@ -90,5 +90,22 @@ async def get_organization_users(
     return await crud.get_users_for_organization(db, org_id)
 
 
+@app.get("/admin/organizations/{org_id}/incidents", response_model=List[schemas.IncidentReport])
+async def get_organization_incidents(
+    org_id: str,
+    db: aiosqlite.Connection = Depends(get_db_connection)
+):
+    """
+    Get all incident reports for a specific organization.
+    
+    Args:
+        org_id: Organization ID
+        
+    Returns:
+        List[schemas.IncidentReport]: List of incident reports belonging to the organization, ordered by collected_at (newest first)
+    """
+    return await crud.get_incident_reports_for_organization(db, org_id)
+
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8003)

@@ -137,3 +137,42 @@ async def get_users_for_organization(
         users.append(user)
     
     return users
+
+
+async def get_incident_reports_for_organization(
+    db: aiosqlite.Connection,
+    org_id: str
+) -> List[schemas.IncidentReport]:
+    """
+    Get all incident reports for a specific organization.
+    
+    Args:
+        db: Async SQLite database connection
+        org_id: Organization ID to filter incident reports
+        
+    Returns:
+        List[schemas.IncidentReport]: List of incident reports belonging to the organization
+    """
+    incidents = []
+    
+    cursor = await db.execute(
+        "SELECT * FROM incident_reports WHERE org_id = ? ORDER BY collected_at DESC",
+        (org_id,)
+    )
+    incident_rows = await cursor.fetchall()
+    await cursor.close()
+    
+    for incident_row in incident_rows:
+        incident = schemas.IncidentReport(
+            incident_id=incident_row["incident_id"],
+            org_id=incident_row["org_id"],
+            source=incident_row["source"],
+            severity=incident_row["severity"],
+            category=incident_row["category"],
+            collected_at=incident_row["collected_at"],
+            leaked_email_count=incident_row["leaked_email_count"],
+            compromised_machine_count=incident_row["compromised_machine_count"]
+        )
+        incidents.append(incident)
+    
+    return incidents
