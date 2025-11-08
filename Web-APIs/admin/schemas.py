@@ -29,7 +29,7 @@ class IncidentReport(BaseModel):
     """
     Pydantic model representing an incident from the incident_reports table.
     """
-    incident_id: str
+    incident_id: int
     org_id: str
     source: str
     severity: str
