@@ -9,7 +9,7 @@ from urllib.parse import urljoin
 # ================= CONFIG =================
 URL = "https://breach.house/all_breaches" 
 LIMIT = 20                            
-JSON_PATH = "leaks.json"
+JSON_PATH = "../../Web-APIs/dashboard/leaks.json"
 FETCH_EVERY_SECONDS = 60 * 60          
 USER_AGENT = (
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
@@ -134,5 +134,5 @@ def run_forever():
 
 
 if __name__ == "__main__":
-    run_once()
-    # run_forever()
+    # run_once()
+    run_forever()

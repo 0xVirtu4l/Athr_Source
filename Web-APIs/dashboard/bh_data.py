@@ -3,8 +3,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 import json
 import os
+import uvicorn
 
-JSON_PATH = "leaks.json"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+JSON_PATH = os.path.join(BASE_DIR, "leaks.json")
 
 app = FastAPI(
     title="Athr Leaks API",
@@ -59,3 +61,6 @@ def get_leak_by_index(index: int):
     if index < 0 or index >= len(data):
         raise HTTPException(status_code=404, detail="Leak not found")
     return data[index]
+
+if __name__ == "__main__":
+    uvicorn.run("bh_data:app", host="0.0.0.0", port=8005, reload=True)
