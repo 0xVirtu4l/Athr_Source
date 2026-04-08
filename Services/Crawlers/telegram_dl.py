@@ -4,8 +4,8 @@ from Services.Core.extractors import count_signals
 from Services.Core.severity import score_severity, SignalCounts
 from Services.Core.storage_guard import can_download, GuardConfig
 
-API_ID = 25193239        
-API_HASH = "c510656fac88db8040fc1ef74095cv3b"
+API_ID = {TEL_ID}        
+API_HASH = {TEL_HASH}
 SESSION = "athr_session"
 SAVE_DIR = "/data/athr/raw/telegram"
 ALLOWED = {".txt",".csv",".json",".log",".zip",".7z",".rar"}
