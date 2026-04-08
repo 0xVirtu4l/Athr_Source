@@ -7,7 +7,7 @@ import time
 from urllib.parse import urljoin
 
 # ================= CONFIG =================
-URL = "https://breach.house/all_breaches" 
+URL = "{BH_URL}" 
 LIMIT = 20                            
 JSON_PATH = "../../Web-APIs/dashboard/leaks.json"
 FETCH_EVERY_SECONDS = 60 * 60          
